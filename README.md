@@ -81,6 +81,7 @@ Aplicação de técnicas de aprendizado não supervisionado para identificação
 
 - **K-Means:** agrupamento de registros com características semelhantes, permitindo identificar diferentes padrões nas compras diretas.
 - **Isolation Forest:** identificação de observações potencialmente anômalas a partir de seu isolamento em relação ao conjunto de dados.
+- **DBSCAN:** identifica regiões com elevada concentração de observações, separadas por áreas de menor densidade, distingue observações centrais, observações de borda e pontos classificados como ruído.
 
 Os resultados são utilizados como indicadores para direcionar análises mais detalhadas. A identificação de anomalias estatísticas não representa, isoladamente, a comprovação de irregularidades administrativas ou legais.
 
@@ -104,10 +105,7 @@ O repositório está organizado da seguinte forma:
 ```text
 tcc_compras_diretas/
 │
-├── Artigos/
-│   └── Referências e materiais científicos
-│
-├── DB/
+├── sql/
 │   └── Estruturas e arquivos relacionados ao banco de dados
 │
 ├── Dados/
@@ -116,14 +114,18 @@ tcc_compras_diretas/
 ├── Painel/
 │   └── Arquivos do projeto Power BI
 │
-├── TCCr/
+├── artigo/
 │   └── Documentação acadêmica
 │
-├── ETL_TCC_compras_diretas.ipynb
+├── imagens/
+│   └── gráficos e demonstrações visuais.
 │
-├── SQL_TCC_compras_diretas.ipynb
+├── codigo/
+│   └── ETL_TCC_compras_diretas.ipynb
 │
-├── ML_TCC_compras_diretas.ipynb
+│   └── SQL_TCC_compras_diretas.ipynb
+│
+│   └── ML_TCC_compras_diretas.ipynb
 │
 └── README.md
 ```
