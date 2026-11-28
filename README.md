@@ -21,7 +21,7 @@ Os dados utilizados são provenientes da API de Dados Abertos do Tribunal de Con
 
 **Fonte:** [TCE-RJ – API de Compras Diretas do Estado](https://dados.tcerj.tc.br/api/v1/docs#/Estado/compras_diretas_estado_api_v1_compras_diretas_estado_get).
 
-**Período analisado:** janeiro de 2023 a junho de 2026.
+**Período analisado:** janeiro de 2023 a Outubro de 2026.
 
 A base contempla informações sobre processos de compras diretas, órgãos contratantes, fornecedores, objetos, itens, quantidades, valores e enquadramentos legais.
 
@@ -126,6 +126,8 @@ tcc_compras_diretas/
 │   └── SQL_TCC_compras_diretas.ipynb
 │
 │   └── ML_TCC_compras_diretas.ipynb
+│
+├── requirements.txt
 │
 └── README.md
 ```

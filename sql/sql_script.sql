@@ -5,9 +5,7 @@
 --            FKs NULLABLE quando o dado pode estar ausente na origem.
 -- ============================================================================
 
-
 -- Garantir schema public no supabase
-
 SET search_path TO public;
 
 
@@ -65,12 +63,14 @@ CREATE TABLE categoria_item (
 
 
 CREATE TABLE afastamento (
-    idafastamento          SERIAL       NOT NULL,
-    descricao_afastamento  VARCHAR(50),
+    idafastamento          SERIAL  NOT NULL,
+    descricao_afastamento  TEXT,   
     PRIMARY KEY (idafastamento)
 );
 COMMENT ON TABLE afastamento IS
     'Sem UNIQUE porque a origem pode trazer variações textuais da mesma modalidade.';
+COMMENT ON COLUMN afastamento.descricao_afastamento IS
+    'TEXT sem limite: a fonte pode trazer descrições longas que excedem 50 caracteres.';
 
 
 CREATE TABLE un_medida (
@@ -88,6 +88,8 @@ CREATE TABLE cnae (
     PRIMARY KEY (id_cnae),
     CONSTRAINT uq_cnae UNIQUE (cnae)
 );
+COMMENT ON TABLE cnae IS
+    'Não populada nesta versão; mantida para futura integração com dados de CNPJ.';
 
 
 -- ============================================================================
@@ -104,6 +106,8 @@ CREATE TABLE municipio (
 );
 CREATE INDEX municipio_FKIndex1 ON municipio (uf_iduf);
 CREATE INDEX IFK_Rel_01 ON municipio (uf_iduf);
+COMMENT ON TABLE municipio IS
+    'Não populada nesta versão; mantida para futura integração com dados de endereço.';
 
 
 CREATE TABLE cep (
@@ -115,7 +119,8 @@ CREATE TABLE cep (
 CREATE INDEX cep_FKIndex1 ON cep (municipio_idmunicipio);
 COMMENT ON TABLE cep IS
     'Cada CEP pertence a um único município, eliminando a dependência '
-    'transitiva parte → cep → município. CEP sem máscara (8 dígitos).';
+    'transitiva parte → cep → município. CEP sem máscara (8 dígitos). '
+    'Não populada nesta versão; mantida para futura integração.';
 
 
 -- ============================================================================
@@ -163,6 +168,8 @@ CREATE TABLE parte_pf (
 CREATE INDEX parte_pf_FKIndex1 ON parte_pf (parte_idparte);
 CREATE UNIQUE INDEX uq_parte_pf_cpf
     ON parte_pf (cpf) WHERE cpf IS NOT NULL;
+COMMENT ON TABLE parte_pf IS
+    'Não populada nesta versão; mantida para futura integração com quadro societário.';
 
 
 CREATE TABLE parte_pj (
@@ -184,7 +191,9 @@ CREATE UNIQUE INDEX uq_parte_pj_cnpj
     ON parte_pj (cnpj) WHERE cnpj IS NOT NULL;
 COMMENT ON TABLE parte_pj IS
     'O identificador (CNPJ) fica no subtipo, e não no supertype, por escolha de '
-    'modelagem que preserva a semântica PF/PJ. Documentado como decisão consciente.';
+    'modelagem que preserva a semântica PF/PJ. Documentado como decisão consciente. '
+    'Nesta versão, os fornecedores foram carregados apenas com o nome (sem CNPJ), '
+    'o que é uma limitação da fonte.';
 
 
 CREATE TABLE cnae_parte (
@@ -199,6 +208,8 @@ CREATE TABLE cnae_parte (
 );
 CREATE INDEX cnae_parte_FKIndex1 ON cnae_parte (cnae_id_cnae);
 CREATE INDEX cnae_parte_FKIndex2 ON cnae_parte (parte_pj_idparte_pj);
+COMMENT ON TABLE cnae_parte IS
+    'Não populada nesta versão; mantida para futura integração com dados de CNAE.';
 
 
 -- ============================================================================
@@ -222,7 +233,8 @@ CREATE INDEX socio_FKIndex1 ON socio (parte_idparte_socio);
 CREATE INDEX socio_FKIndex2 ON socio (parte_pj_idparte_pj);
 COMMENT ON TABLE socio IS
     'Quadro societário. Um sócio (PF ou PJ) participa de uma ou mais empresas (PJ). '
-    'Permite identificar sócios em comum entre fornecedores, padrão clássico de conluio.';
+    'Permite identificar sócios em comum entre fornecedores, padrão clássico de conluio. '
+    'Não populada nesta versão; mantida para futura integração.';
 COMMENT ON COLUMN socio.percentual_participacao IS
     'Percentual de participação (0.00 a 100.00). NULLABLE: a fonte pode não informar.';
 
@@ -262,6 +274,8 @@ CREATE TABLE orgao_municipal (
 );
 CREATE INDEX orgao_municipal_FKIndex1 ON orgao_municipal (orgao_idorgao);
 CREATE INDEX orgao_municipal_FKIndex2 ON orgao_municipal (municipio_idmunicipio);
+COMMENT ON TABLE orgao_municipal IS
+    'Não populada nesta versão (dados são estaduais); mantida para futura integração.';
 
 
 CREATE TABLE orgao_estadual (
@@ -292,6 +306,8 @@ CREATE TABLE item (
 );
 CREATE INDEX item_FKIndex1 ON item (un_medida_idun_medida);
 CREATE INDEX item_FKIndex2 ON item (categoria_item_idcategoria_item);
+COMMENT ON COLUMN item.descricao_item IS
+    'TEXT: descrições de item podem ser longas e variadas.';
 
 
 -- ============================================================================
@@ -302,19 +318,16 @@ CREATE TABLE processo (
     idprocesso                            SERIAL        NOT NULL,
     tipo_contratacao_idtipo_contratacao   INTEGER,
     orgao_idorgao                         INTEGER,
-    parte_idparte                         INTEGER,
     numero_processo                       VARCHAR(40),
     valor_processo                        NUMERIC(18,2),
-    objeto                                VARCHAR(200),
+    objeto                                TEXT,         
     ano_processo                          INTEGER,
     data_aprovacao                        DATE,
-    enquadramento                         VARCHAR(200),
+    enquadramento                         TEXT,         
     PRIMARY KEY (idprocesso),
-    FOREIGN KEY (parte_idparte) REFERENCES parte(idparte),
     FOREIGN KEY (orgao_idorgao) REFERENCES orgao(idorgao),
     FOREIGN KEY (tipo_contratacao_idtipo_contratacao) REFERENCES tipo_contratacao(idtipo_contratacao)
 );
-CREATE INDEX processo_FKIndex1 ON processo (parte_idparte);
 CREATE INDEX processo_FKIndex2 ON processo (orgao_idorgao);
 CREATE INDEX processo_FKIndex3 ON processo (tipo_contratacao_idtipo_contratacao);
 CREATE INDEX idx_processo_ano ON processo (ano_processo);
@@ -326,7 +339,6 @@ COMMENT ON COLUMN processo.valor_processo IS
 COMMENT ON COLUMN processo.ano_processo IS
     'Redundância controlada em relação a data_aprovacao. Mantido como controle '
     'para verificar divergências entre o ano declarado e a data efetiva.';
-
 
 -- ============================================================================
 -- 8. PROCESSO COMPRA DIRETA (subtype 1:1)
@@ -353,16 +365,20 @@ CREATE TABLE itens_processo (
     iditens_processo     SERIAL         NOT NULL,
     processo_idprocesso  INTEGER        NOT NULL,
     item_iditem          INTEGER        NOT NULL,
+    parte_idparte        INTEGER,        -- NOVO: fornecedor do item
     quantidade           NUMERIC(18,4),
     valor_unitario       NUMERIC(18,4),
     PRIMARY KEY (iditens_processo),
     FOREIGN KEY (item_iditem) REFERENCES item(iditem),
-    FOREIGN KEY (processo_idprocesso) REFERENCES processo(idprocesso)
+    FOREIGN KEY (processo_idprocesso) REFERENCES processo(idprocesso),
+    FOREIGN KEY (parte_idparte) REFERENCES parte(idparte)  -- NOVO
 );
 CREATE INDEX itens_processo_FKIndex1 ON itens_processo (item_iditem);
 CREATE INDEX itens_processo_FKIndex2 ON itens_processo (processo_idprocesso);
+CREATE INDEX itens_processo_FKIndex3 ON itens_processo (parte_idparte);  -- NOVO
 CREATE INDEX idx_itens_valor_unit ON itens_processo (valor_unitario);
 CREATE INDEX idx_itens_quantidade ON itens_processo (quantidade);
+
 
 -- ============================================================================
 -- FIM DO SCRIPT

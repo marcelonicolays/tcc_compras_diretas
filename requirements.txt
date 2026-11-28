@@ -1,0 +1,25 @@
+# ============================================================================
+# Requisitos do projeto — Análise de Compras Diretas do TCE-RJ
+# ============================================================================
+# Python:   3.13.18
+# Sistema:  Linux 6.6.159+
+# Gerado:   2026-11-26T21:51:51
+# ============================================================================
+
+# --- Núcleo de dados ---
+pandas==2.2.3
+numpy==2.4.6
+pyarrow==23.0.1
+
+# --- Banco de dados ---
+SQLAlchemy==2.1.7
+psycopg2-binary==2.9.13
+
+# --- Machine Learning ---
+scikit-learn==1.6.1
+scipy==1.16.3
+kneed==0.9.0
+
+# --- Visualização ---
+matplotlib==3.10.0
+plotly==5.24.1
